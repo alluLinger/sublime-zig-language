@@ -133,6 +133,7 @@ class ZigBuildCommand(sublime_plugin.WindowCommand, ProcessSink):
             elif isinstance(cmd, str):
                 args.append(cmd)
 
+        
         return sublime.expand_variables(args, vars)
 
     def run(self, cmd=None, build=None, quiet=False, kill=False, update_phantoms_only=False):
@@ -149,7 +150,12 @@ class ZigBuildCommand(sublime_plugin.WindowCommand, ProcessSink):
         working_dir = vars.get('file_path', vars['folder'])
 
         view = self.window.active_view()
-        self.quiet = get_setting(view, 'zig.quiet', quiet)
+        if(cmd is not None):
+            self.quiet = True
+            self.isBuild = False
+        else:
+            self.quiet = get_setting(view, 'zig.quiet', quiet)
+            self.isBuild = True
 
         with self.panel_lock:
             # Creating the panel implicitly clears any previous contents
@@ -248,16 +254,19 @@ class ZigBuildCommand(sublime_plugin.WindowCommand, ProcessSink):
                 self.write(None, "[Finished in %s with exit code %d]\n" %
                            (elapsed_str, exit_code))
 
+        commandType = "Build"
+        if not self.isBuild:
+            commandType = ""
         if proc.killed:
-            sublime.status_message("Build cancelled")
+            sublime.status_message("Zig %s cancelled" % commandType)
         else:
             with self.panel_lock:
                 errs = self.panel.find_all_results()
                 if len(errs) == 0:
-                    sublime.status_message("Build finished")
+                    sublime.status_message("Zig %s finished" % commandType)
                 else:
-                    sublime.status_message("Build finished with %d errors" %
-                                           len(errs))
+                    sublime.status_message("Zig %s finished with %d errors" % commandType
+                                           % len(errs))
 
     def update_phantoms(self):
         stylesheet = '''

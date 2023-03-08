@@ -11,6 +11,6 @@
     // format either file or project. the only valid options are "file" or "project"
     "zig.fmt.mode": "file",
 
-    // automatically hide the build/fmt output panel 
+    // automatically hide the build output panel 
     "zig.quiet": false,
 }
